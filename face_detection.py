@@ -1,3 +1,5 @@
+## Face detection using face_detection Python Library ##
+
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt

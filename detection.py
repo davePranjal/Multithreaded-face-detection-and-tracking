@@ -1,3 +1,5 @@
+## Face detection code - taken from OpenCV documentation ##
+
 import numpy as np
 import cv2
 

@@ -1,3 +1,5 @@
+## Breaks the video into frames and saves them as images ##
+
 import cv2
 import numpy as np
 import os
