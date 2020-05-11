@@ -18,8 +18,6 @@ import face_recognition
 
 face_cascade = cv2.CascadeClassifier('C:\\Users\\pranj\\anaconda\\pkgs\\libopencv-4.2.0-py37_6\\Library\\etc\\haarcascades\\haarcascade_frontalface_default.xml')
 
-
-
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video", type=str,
     help="path to input video file")
@@ -51,11 +49,13 @@ else:
     vs = cv2.VideoCapture(args["video"])
 # initialize the FPS throughput estimator
 fps = None
+count = 0
 # loop over frames from the video stream
 while True:
     # grab the current frame, then handle if we are using a
     # VideoStream or VideoCapture object
     frame = vs.read()
+    count = count +1
     frame = frame[1] if args.get("video", False) else frame
     # check to see if we have reached the end of the stream
     if frame is None:
@@ -78,19 +78,21 @@ while True:
     # if the 's' key is selected, we are going to "select" a bounding
     # box to track
     # if key == ord("s"):
+    if count == 50 and len(boxes) <= 2:
         # select the bounding box of the object we want to track (make
         # sure you press ENTER or SPACE after selecting the ROI)
     # img = cv2.imread('speaker1.jpg')
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
-    for (x,y,w,h) in faces:
-            # img = cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
-            # roi_gray = gray[y:y+h, x:x+w]
-        box = tuple((x,y,w,h))
-        # create a new object tracker for the bounding box and add it
-        # to our multi-object tracker
-    tracker = OPENCV_OBJECT_TRACKERS[args["tracker"]]()
-    trackers.add(tracker, frame, tuple(box))
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+        for (x,y,w,h) in faces:
+                # img = cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
+                # roi_gray = gray[y:y+h, x:x+w]
+            box = tuple((x,y,w,h))
+            # create a new object tracker for the bounding box and add it
+            # to our multi-object tracker
+        tracker = OPENCV_OBJECT_TRACKERS[args["tracker"]]()
+        trackers.add(tracker, frame, tuple(box))
+        count = 0
 
     if key == ord("q"):
         break
