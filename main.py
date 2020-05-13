@@ -14,6 +14,10 @@ import cv2
 from matplotlib import pyplot as plt
 import face_recognition
 
+def isBoxtooclose(box,boxes):
+    for element in boxes:
+        diff = tuple(np.subtract(element,box))
+        return all(x > y for x, y in zip(diff, (15,15,15,15)))
 ### Geting the detection boxes ###
 
 face_cascade = cv2.CascadeClassifier('C:\\Users\\pranj\\anaconda\\pkgs\\libopencv-4.2.0-py37_6\\Library\\etc\\haarcascades\\haarcascade_frontalface_default.xml')
@@ -39,6 +43,8 @@ trackers = cv2.MultiTracker_create()
 # initialize the bounding box coordinates of the object we are going
 # to track
 
+
+fps = 30
 # if a video path was not supplied, grab the reference to the web cam
 if not args.get("video", False):
     print("[INFO] starting video stream...")
@@ -47,8 +53,12 @@ if not args.get("video", False):
 # otherwise, grab a reference to the video file
 else:
     vs = cv2.VideoCapture(args["video"])
+    fps = vs.get(cv2.CAP_PROP_FPS)
+
 # initialize the FPS throughput estimator
-fps = None
+#fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
+fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+output_movie = cv2.VideoWriter('output.mp4', fourcc, fps, (1280, 720), True)
 count = 0
 # loop over frames from the video stream
 while True:
@@ -78,22 +88,26 @@ while True:
     # if the 's' key is selected, we are going to "select" a bounding
     # box to track
     # if key == ord("s"):
-    if count == 50 and len(boxes) <= 2:
+    if count == 150 and len(boxes) <= 2 :
+        print("reached ")
         # select the bounding box of the object we want to track (make
         # sure you press ENTER or SPACE after selecting the ROI)
-    # img = cv2.imread('speaker1.jpg')
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
         for (x,y,w,h) in faces:
+            # print("reached here ")
                 # img = cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
                 # roi_gray = gray[y:y+h, x:x+w]
             box = tuple((x,y,w,h))
             # create a new object tracker for the bounding box and add it
             # to our multi-object tracker
         tracker = OPENCV_OBJECT_TRACKERS[args["tracker"]]()
-        trackers.add(tracker, frame, tuple(box))
+        if len(faces) != 0 :
+            if not isBoxtooclose(box, boxes):
+                trackers.add(tracker, frame, tuple(box))
         count = 0
-
+    #print("Writing frame {} / {}".format(frame_number, length))
+    output_movie.write(frame)
     if key == ord("q"):
         break
 # if we are using a webcam, release the pointer
@@ -103,4 +117,5 @@ if not args.get("video", False):
 else:
     vs.release()
 # close all windows
+output_movie.release()
 cv2.destroyAllWindows()
