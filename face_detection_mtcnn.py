@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri May  8 23:48:40 2020
-
-@author: pranj
-"""
 from imutils.video import VideoStream
 from imutils.video import FPS
 import argparse
@@ -14,17 +8,18 @@ import cv2
 from matplotlib import pyplot as plt
 import face_recognition
 from random import randint
-
+from matplotlib import pyplot
+from mtcnn.mtcnn import MTCNN
 
 def isBoxtooclose(box,boxes):
     res = False
     for element in boxes:
         diff = tuple(np.subtract(element,box))
-        res = res or  all(x < y for x, y in zip(diff, (5,5,5,5)))
+        res = res or  all(x < y for x, y in zip(diff, (50,50,50,50)))
     return res
 ### Geting the detection boxes ###
 
-face_cascade = cv2.CascadeClassifier('C:\\Users\\pranj\\anaconda\\pkgs\\libopencv-4.2.0-py37_6\\Library\\etc\\haarcascades\\haarcascade_frontalface_default.xml')
+detector = MTCNN()
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video", type=str,
@@ -46,7 +41,8 @@ OPENCV_OBJECT_TRACKERS = {
 trackers = cv2.MultiTracker_create()
 # initialize the bounding box coordinates of the object we are going
 # to track
-
+instance = 0
+newDetected = False
 colors =[]
 fps = 30
 # if a video path was not supplied, grab the reference to the web cam
@@ -89,9 +85,11 @@ while True:
     for box in boxes:
         (x, y, w, h) = [int(v) for v in box]
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        roi_color = frame[y:y + h, x:x + w]
-        roi_color = cv2.resize(roi_color,None,fx=3,fy=3)
-        cv2.imwrite(str(w) + str(h) + '_faces.jpg', roi_color)
+        if newDetected:
+            roi_color = frame[y:y + h, x:x + w]
+            roi_color = cv2.resize(roi_color,None,fx=3,fy=3)
+            cv2.imwrite("C:\\Users\\pranj\\Desktop\\Project_mixorg\\Multithreaded-face-detection-and-tracking\\Faces_detected\\"+str(instance) + str(w) + str(h) + '_faces.jpg', roi_color)
+            newDetected = False
     # show the output frame
     cv2.imshow("Frame", frame)
     key = cv2.waitKey(1) & 0xFF
@@ -99,23 +97,20 @@ while True:
     # box to track
     # if key == ord("s"):
     if count == 15 :
-        print("Detected new face ")
-        # select the bounding box of the object we want to track (make
-        # sure you press ENTER or SPACE after selecting the ROI)
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = face_cascade.detectMultiScale(gray, 1.5, 5)
-        #colors.append((randint(0, 255), randint(0, 255), randint(0, 255)))
-        for (x,y,w,h) in faces:
+        print("Trying to detect new face.... ")
+        faces = detector.detect_faces(frame)
+        for face in faces:
             # print("reached here ")
                 # img = cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
                 # roi_gray = gray[y:y+h, x:x+w]
-            box = tuple((x,y,w,h))
+            box = tuple(face["box"])
             # create a new object tracker for the bounding box and add it
             # to our multi-object tracker
-        tracker = OPENCV_OBJECT_TRACKERS[args["tracker"]]()
-        if len(faces) != 0 :
+            tracker = OPENCV_OBJECT_TRACKERS[args["tracker"]]()
             if not isBoxtooclose(box, boxes):
                 trackers.add(tracker, frame, tuple(box))
+                instance+=1
+                newDetected = True
 
         count = 0
     #print("Writing frame {} / {}".format(frame_number, length))
