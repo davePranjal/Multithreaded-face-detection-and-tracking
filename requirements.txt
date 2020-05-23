@@ -1,0 +1,13 @@
+scipy
+scikit-learn
+h5py
+matplotlib
+Pillow
+requests
+psutil
+imutils
+numpy
+threading
+multiprocessing
+argparse
+face_recognition

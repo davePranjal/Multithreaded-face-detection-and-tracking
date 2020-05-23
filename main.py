@@ -12,8 +12,9 @@ import time
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
-import face_recognition
-from random import randint
+# import face_recognition
+import threading
+# from random import randint
 
 
 def isBoxtooclose(box,boxes):
@@ -63,12 +64,15 @@ else:
 #fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
 # fourcc = cv2.VideoWriter_fourcc(*'DIVX')
 # output_movie = cv2.VideoWriter('output.mp4', fourcc, fps, (1280, 720), True)
-fourcc = cv2.VideoWriter_fourcc('M','P','E','G')
-#fourcc = -1
-
-output_movie = cv2.VideoWriter('output.mp4', fourcc, 25.07, (1280, 720))
+# fourcc = cv2.VideoWriter_fourcc('M','P','E','G')
+# #fourcc = -1
+#
+# output_movie = cv2.VideoWriter('output.mp4', fourcc, 25.07, (1280, 720))
 count = 0
-# loop over frames from the video stream
+## Detection Function ##
+
+# ## threading ##
+# t1 = threading.Thread(target =  , name = "t1" , args = ())
 while True:
     # grab the current frame, then handle if we are using a
     # VideoStream or VideoCapture object
@@ -119,7 +123,7 @@ while True:
 
         count = 0
     #print("Writing frame {} / {}".format(frame_number, length))
-    output_movie.write(frame)
+    # output_movie.write(frame)
     if key == ord("q"):
         break
 # if we are using a webcam, release the pointer
